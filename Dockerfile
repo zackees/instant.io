@@ -1,7 +1,5 @@
-FROM node:18-alpine3.15
+FROM node:12
 
-
-# RUN npm install -g bittorrent-tracker
 WORKDIR /app
 
 COPY . .
