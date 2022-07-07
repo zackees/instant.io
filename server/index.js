@@ -136,6 +136,6 @@ app.use(function (err, req, res, next) {
   })
 })
 
-server.listen(PORT, '127.0.0.1', function () {
+server.listen(PORT, '0.0.0.0', function () {
   console.log('listening on port %s', server.address().port)
 })
