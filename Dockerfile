@@ -1,4 +1,4 @@
-FROM node:12
+FROM node:18-alpine3.15
 
 
 # RUN npm install -g bittorrent-tracker
@@ -9,7 +9,5 @@ RUN npm install
 RUN npm run build
 
 EXPOSE 80
-
-# CMD ["bittorrent-tracker"]
 
 CMD ["npm", "run", "start", "80"]
