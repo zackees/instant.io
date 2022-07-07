@@ -1,8 +1,7 @@
 FROM node:12
 
-WORKDIR /app
-
-COPY . .
+RUN git clone https://github.com/zackees/instant.io
+WORKDIR /instant.io
 RUN npm install
 RUN npm run build
 
