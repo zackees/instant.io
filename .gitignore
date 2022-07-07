@@ -5,3 +5,4 @@ secret/*
 
 static/main.css
 static/bundle.js
+package-lock.json
