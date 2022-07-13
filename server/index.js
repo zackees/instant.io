@@ -109,7 +109,7 @@ app.get('/__rtcConfig__', cors({
   if (!rtcConfig) return res.status(404).send({ rtcConfig: {} })
   res.send({
     comment: 'WARNING: This is *NOT* a public endpoint. Do not depend on it in your app',
-    rtcConfig: rtcConfig
+    rtcConfig
   })
 })
 

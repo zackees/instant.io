@@ -13,6 +13,7 @@ const WebTorrent = require('webtorrent')
 const JSZip = require('jszip')
 const SimplePeer = require('simple-peer')
 const util = require('./util')
+const getNATtype = require('./NATtype').getNATtype
 
 // Define this to list of your tracker's announce urls.
 // const DEFAULT_TRACKERS = ['ws://localhost:8000/']
@@ -20,14 +21,14 @@ const util = require('./util')
 function getTrackerList () {
   // Get the url params as a map
   const dom = document.getElementById('trackers')
-  let tracker_url = new URLSearchParams(window.location.search).get("tracker")
-  if (tracker_url) {
+  let trackerUrl = new URLSearchParams(window.location.search).get('tracker')
+  if (trackerUrl) {
     // if prefix does not exist
-    if (tracker_url.indexOf('//') === -1 && tracker_url.indexOf('localhost') === -1) {
+    if (trackerUrl.indexOf('//') === -1 && trackerUrl.indexOf('localhost') === -1) {
       // Add wss prefix.
-      tracker_url = 'wss://' + tracker_url
+      trackerUrl = 'wss://' + trackerUrl
     }
-    return [tracker_url]
+    return [trackerUrl]
   }
   if (dom.value.trim() === '') {
     const announceList = createTorrent.announceList.map(function (arr) {
@@ -74,6 +75,12 @@ function init () {
   if (!WebTorrent.WEBRTC_SUPPORT) {
     util.error('This browser is unsupported. Please use a browser with WebRTC support.')
   }
+
+  function setNATtype (natType) {
+    document.getElementById('p-nat-type').innerHTML = 'You have a <b>' + natType + '</b> type.'
+  }
+
+  getNATtype(setNATtype)
 
   // For performance, create the client immediately
   getClient(function () {})
