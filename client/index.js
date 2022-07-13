@@ -16,7 +16,7 @@ const util = require('./util')
 
 // Define this to list of your tracker's announce urls.
 // const DEFAULT_TRACKERS = ['ws://localhost:8000/']
-// TODO: Refactor this as it writes out to dom with id=trackers.
+// Overrides if url search params has tracker=<url>
 function getTrackerList () {
   // Get the url params as a map
   const dom = document.getElementById('trackers')
@@ -27,7 +27,7 @@ function getTrackerList () {
       // Add wss prefix.
       tracker_url = 'wss://' + tracker_url
     }
-    dom.value = tracker_url
+    return [tracker_url]
   }
   if (dom.value.trim() === '') {
     const announceList = createTorrent.announceList.map(function (arr) {
