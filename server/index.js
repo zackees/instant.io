@@ -49,8 +49,8 @@ app.use(function (req, res, next) {
   }
 
   // Redirect www to non-www
-  if (config.isProd && req.hostname === 'www.instant.io') {
-    return res.redirect('https://instant.io' + req.url)
+  if (req.hostname.startsWith('www.')) {
+    return res.redirect('https://' + req.hostname.slice(4) + req.url)
   }
 
   // Use HTTP Strict Transport Security
