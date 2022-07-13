@@ -132,7 +132,7 @@ function init () {
 function getRtcConfig (cb) {
   // WARNING: This is *NOT* a public endpoint. Do not depend on it in your app.
   get.concat({
-    url: '/__rtcConfig__',
+    url: '/config',
     timeout: 5000
   }, function (err, res, data) {
     if (err || res.statusCode !== 200) {

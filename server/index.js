@@ -11,12 +11,6 @@ const config = require('../config')
 
 const PORT = Number(process.argv[2]) || 4000
 
-const CORS_WHITELIST = [
-  // Favor to friends :)
-  'http://rollcall.audio',
-  'https://rollcall.audio'
-]
-
 let secret
 try {
   secret = require('../secret')
@@ -94,13 +88,9 @@ app.get('/', function (req, res) {
   })
 })
 
-// WARNING: This is *NOT* a public endpoint. Do not depend on it in your app.
-app.get('/__rtcConfig__', cors({
+app.get('/config', cors({
   origin: function (origin, cb) {
-    const allowed = CORS_WHITELIST.indexOf(origin) >= 0 ||
-      /https?:\/\/localhost(:|$)/.test(origin) ||
-      /https?:\/\/airtap\.local(:|$)/.test(origin)
-    cb(null, allowed)
+    cb(null, true)
   }
 }), function (req, res) {
   // console.log('referer:', req.headers.referer, 'user-agent:', req.headers['user-agent'])
@@ -108,7 +98,6 @@ app.get('/__rtcConfig__', cors({
 
   if (!rtcConfig) return res.status(404).send({ rtcConfig: {} })
   res.send({
-    comment: 'WARNING: This is *NOT* a public endpoint. Do not depend on it in your app',
     rtcConfig
   })
 })
