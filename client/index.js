@@ -20,7 +20,7 @@ const util = require('./util')
 function getTrackerList () {
   // Get the url params as a map
   const dom = document.getElementById('trackers')
-  const tracker_url = new URLSearchParams(window.location.search).get("tracker")
+  let tracker_url = new URLSearchParams(window.location.search).get("tracker")
   if (tracker_url) {
     // if prefix does not exist
     if (tracker_url.indexOf('//') === -1 && tracker_url.indexOf('localhost') === -1) {
