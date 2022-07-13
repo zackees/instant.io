@@ -76,11 +76,14 @@ function init () {
     util.error('This browser is unsupported. Please use a browser with WebRTC support.')
   }
 
-  function setNATtype (natType) {
-    document.getElementById('p-nat-type').innerHTML = 'You have a <b>' + natType + '</b> type.'
-  }
-
-  getNATtype(setNATtype)
+  getNATtype(natType => {
+    const dom = document.getElementById('p-nat-type')
+    if (natType.indexOf('Symmetric') !== -1) {
+      dom.innerHTML = 'You have a <b style="color: red;">' + natType + '</b> type, and this site will not work.'
+    } else {
+      dom.innerHTML = 'You have a <b>' + natType + '</b> type.'
+    }
+  })
 
   // For performance, create the client immediately
   getClient(function () {})
