@@ -1,8 +1,10 @@
 /* global RTCPeerConnection */
 
 const ICE_SERVERS = [
+  { urls: 'stun:stun.l.google.com:19302' },
   { urls: 'stun:stun1.l.google.com:19302' },
-  { urls: 'stun:stun2.l.google.com:19302' }
+  { urls: 'stun:stun2.l.google.com:19302' },
+  { urls: 'stun:global.stun.twilio.com:3478' }
 ]
 
 function parseCandidate (line) {
@@ -52,12 +54,12 @@ exports.fetchNATtype = function fetchNATtype (cb) {
   pc.onicecandidate = function (e) {
     // console.log("onicecandidate", e)
     if (e.candidate && e.candidate.candidate.indexOf('srflx') !== -1) {
-      // console.log("found srflx candidate")
+      // console.log('found srflx candidate')
       const cand = parseCandidate(e.candidate.candidate)
       if (!candidates[cand.relatedPort]) candidates[cand.relatedPort] = []
       candidates[cand.relatedPort].push(cand.port)
     } else if (!e.candidate) {
-      // console.log("no more candidates")
+      // onsole.log("no more candidates")
       if (Object.keys(candidates).length === 1) {
         const ports = candidates[Object.keys(candidates)[0]]
         if (ports.length === 1) {

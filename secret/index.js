@@ -2,13 +2,17 @@ exports.rollbar = {
   accessToken: 'TODO'
 }
 
+exports.stunServers = [
+  'stun:stun.l.google.com:19302',
+  'stun:stun1.l.google.com:19302',
+  'stun:stun2.l.google.com:19302',
+  'stun:global.stun.twilio.com:3478'
+]
+
 exports.rtcConfig = {
   iceServers: [
     {
-      urls: [
-        'stun:stun.l.google.com:19302',
-        'stun:global.stun.twilio.com:3478'
-      ]
+      urls: exports.stunServers
     }
     /*
     {

@@ -8,7 +8,6 @@ const throttle = require('throttleit')
 const uploadElement = require('upload-element')
 const WebTorrent = require('webtorrent')
 const JSZip = require('jszip')
-const SimplePeer = require('simple-peer')
 const util = require('./util')
 const fetchNATtype = require('./NATtype').fetchNATtype
 const rtcConfig = require('../secret/index').rtcConfig
@@ -17,6 +16,12 @@ const rtcConfig = require('../secret/index').rtcConfig
 // ["wss://tracker.btorrent.xyz", "wss://tracker.openwebtorrent.com"]
 const DEFAULT_TRACKERS = ['wss://webtorrent-tracker.onrender.com']
 const WEBTORRENT_OPTIONS = { announce: getTrackerList() }
+
+const WEBTORRENT_CONFIG = {
+  tracker: {
+    rtcConfig
+  }
+}
 
 // Define this to list of your tracker's announce urls.
 // const DEFAULT_TRACKERS = ['ws://localhost:8000/']
@@ -64,21 +69,9 @@ function getTrackerList () {
 // Dom element will be the source of truth.
 document.getElementById('trackers').value = getTrackerList().join(',')
 
-const DISALLOWED = [
-  '6feb54706f41f459f819c0ae5b560a21ebfead8f'
-]
-
 function newWebtorrentClient () {
-  const options = {
-    tracker: {
-      rtcConfig: {
-        ...SimplePeer.config,
-        ...rtcConfig
-      }
-    }
-  }
   // console.log('getClient options:', options)
-  const client = new WebTorrent(options)
+  const client = new WebTorrent(WEBTORRENT_CONFIG)
   client.on('warning', util.warning)
   client.on('error', util.error)
   return client
@@ -164,16 +157,8 @@ function isNotTorrentFile (file) {
 }
 
 function downloadTorrent (torrentId) {
-  const disallowed = DISALLOWED.some(function (infoHash) {
-    return torrentId.indexOf(infoHash) >= 0
-  })
-
-  if (disallowed) {
-    util.log('File not found ' + torrentId)
-  } else {
-    util.log('Downloading torrent from ' + torrentId)
-    webtorrentClient.add(torrentId, WEBTORRENT_OPTIONS, onTorrent)
-  }
+  util.log('Downloading torrent from ' + torrentId)
+  webtorrentClient.add(torrentId, WEBTORRENT_OPTIONS, onTorrent)
 }
 
 function downloadTorrentFile (file) {
