@@ -43,18 +43,21 @@ function parseCandidate (line) {
   return candidate
 };
 
-exports.getNATtype = function getNATtype (cb) {
+exports.fetchNATtype = function fetchNATtype (cb) {
   cb = cb || console.log
   const candidates = {}
   const rtcOptions = { iceServers: ICE_SERVERS }
   const pc = new RTCPeerConnection(rtcOptions)
   pc.createDataChannel('foo')
   pc.onicecandidate = function (e) {
+    // console.log("onicecandidate", e)
     if (e.candidate && e.candidate.candidate.indexOf('srflx') !== -1) {
+      // console.log("found srflx candidate")
       const cand = parseCandidate(e.candidate.candidate)
       if (!candidates[cand.relatedPort]) candidates[cand.relatedPort] = []
       candidates[cand.relatedPort].push(cand.port)
     } else if (!e.candidate) {
+      // console.log("no more candidates")
       if (Object.keys(candidates).length === 1) {
         const ports = candidates[Object.keys(candidates)[0]]
         if (ports.length === 1) {

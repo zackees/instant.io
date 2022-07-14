@@ -2,18 +2,17 @@ const createTorrent = require('create-torrent')
 const debug = require('debug')('instant.io')
 const dragDrop = require('drag-drop')
 const escapeHtml = require('escape-html')
-const get = require('simple-get')
 const formatDistance = require('date-fns/formatDistance')
 const path = require('path')
 const prettierBytes = require('prettier-bytes')
 const throttle = require('throttleit')
-const thunky = require('thunky')
 const uploadElement = require('upload-element')
 const WebTorrent = require('webtorrent')
 const JSZip = require('jszip')
 const SimplePeer = require('simple-peer')
 const util = require('./util')
-const getNATtype = require('./NATtype').getNATtype
+const fetchNATtype = require('./NATtype').fetchNATtype
+const rtcConfig = require('../secret/index').rtcConfig
 
 // Define this to list of your tracker's announce urls.
 // const DEFAULT_TRACKERS = ['ws://localhost:8000/']
@@ -51,32 +50,30 @@ const DISALLOWED = [
   '6feb54706f41f459f819c0ae5b560a21ebfead8f'
 ]
 
-const getClient = thunky(function (cb) {
-  getRtcConfig(function (err, rtcConfig) {
-    if (err) util.error(err)
-    const client = new WebTorrent({
-      tracker: {
-        rtcConfig: {
-          ...SimplePeer.config,
-          ...rtcConfig
-        }
+function newWebtorrentClient () {
+  const options = {
+    tracker: {
+      rtcConfig: {
+        ...SimplePeer.config,
+        ...rtcConfig
       }
-    })
-    window.client = client // for easier debugging
-    client.on('warning', util.warning)
-    client.on('error', util.error)
-    cb(null, client)
-  })
-})
+    }
+  }
+  // console.log('getClient options:', options)
+  const client = new WebTorrent(options)
+  client.on('warning', util.warning)
+  client.on('error', util.error)
+  return client
+}
 
-init()
+const webtorrentClient = window.webtorrentClient = newWebtorrentClient()
 
 function init () {
   if (!WebTorrent.WEBRTC_SUPPORT) {
     util.error('This browser is unsupported. Please use a browser with WebRTC support.')
   }
 
-  getNATtype(natType => {
+  fetchNATtype(natType => {
     const dom = document.getElementById('p-nat-type')
     if (natType.indexOf('Symmetric') !== -1) {
       dom.innerHTML = 'You have a <b style="color: red;">' + natType + '</b> type, and this site will not work.'
@@ -84,9 +81,6 @@ function init () {
       dom.innerHTML = 'You have a <b>' + natType + '</b> type.'
     }
   })
-
-  // For performance, create the client immediately
-  getClient(function () {})
 
   // Seed via upload input element
   const upload = document.querySelector('input[name=upload]')
@@ -129,26 +123,6 @@ function init () {
   }
 }
 
-function getRtcConfig (cb) {
-  // WARNING: This is *NOT* a public endpoint. Do not depend on it in your app.
-  get.concat({
-    url: '/config',
-    timeout: 5000
-  }, function (err, res, data) {
-    if (err || res.statusCode !== 200) {
-      cb(new Error('Could not get WebRTC config from server. Using default (without TURN).'))
-    } else {
-      try {
-        data = JSON.parse(data)
-      } catch (err) {
-        return cb(new Error('Got invalid WebRTC config from server: ' + data))
-      }
-      debug('got rtc config: %o', data.rtcConfig)
-      cb(null, data.rtcConfig)
-    }
-  })
-}
-
 function onFiles (files) {
   debug('got files:')
   files.forEach(function (file) {
@@ -180,29 +154,20 @@ function downloadTorrent (torrentId) {
     util.log('File not found ' + torrentId)
   } else {
     util.log('Downloading torrent from ' + torrentId)
-    getClient(function (err, client) {
-      if (err) return util.error(err)
-      client.add(torrentId, { announce: getTrackerList() }, onTorrent)
-    })
+    webtorrentClient.add(torrentId, { announce: getTrackerList() }, onTorrent)
   }
 }
 
 function downloadTorrentFile (file) {
   util.unsafeLog('Downloading torrent from <strong>' + escapeHtml(file.name) + '</strong>')
-  getClient(function (err, client) {
-    if (err) return util.error(err)
-    client.add(file, { announce: getTrackerList() }, onTorrent)
-  })
+  webtorrentClient.add(file, { announce: getTrackerList() }, onTorrent)
 }
 
 function seed (files) {
   if (files.length === 0) return
   util.log('Seeding ' + files.length + ' files')
   // Seed from WebTorrent
-  getClient(function (err, client) {
-    if (err) return util.error(err)
-    client.seed(files, { announce: getTrackerList() }, onTorrent)
-  })
+  webtorrentClient.seed(files, { announce: getTrackerList() }, onTorrent)
 }
 
 function onTorrent (torrent) {
@@ -243,8 +208,8 @@ function onTorrent (torrent) {
     util.updateSpeed(
       '<b>Peers:</b> ' + torrent.numPeers + ' ' +
       '<b>Progress:</b> ' + progress + '% ' +
-      '<b>Download speed:</b> ' + prettierBytes(window.client.downloadSpeed) + '/s ' +
-      '<b>Upload speed:</b> ' + prettierBytes(window.client.uploadSpeed) + '/s ' +
+      '<b>Download speed:</b> ' + prettierBytes(webtorrentClient.downloadSpeed) + '/s ' +
+      '<b>Upload speed:</b> ' + prettierBytes(webtorrentClient.uploadSpeed) + '/s ' +
       '<b>ETA:</b> ' + remaining
     )
   }
@@ -316,3 +281,5 @@ function onTorrent (torrent) {
   })
   util.appendElemToLog(downloadZip)
 }
+
+init()
