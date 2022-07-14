@@ -1,4 +1,3 @@
-const createTorrent = require('create-torrent')
 const debug = require('debug')('instant.io')
 const dragDrop = require('drag-drop')
 const escapeHtml = require('escape-html')
@@ -14,6 +13,11 @@ const util = require('./util')
 const fetchNATtype = require('./NATtype').fetchNATtype
 const rtcConfig = require('../secret/index').rtcConfig
 
+// Previously this was:
+// ["wss://tracker.btorrent.xyz", "wss://tracker.openwebtorrent.com"]
+const DEFAULT_TRACKERS = ['wss://webtorrent-tracker.onrender.com']
+const WEBTORRENT_OPTIONS = { announce: getTrackerList() }
+
 // Define this to list of your tracker's announce urls.
 // const DEFAULT_TRACKERS = ['ws://localhost:8000/']
 // Overrides if url search params has tracker=<url>
@@ -21,25 +25,39 @@ function getTrackerList () {
   // Get the url params as a map
   const dom = document.getElementById('trackers')
   let trackerUrl = new URLSearchParams(window.location.search).get('tracker')
+  let out = []
   if (trackerUrl) {
-    // if prefix does not exist
+    // Auto-add the protocol if it's missing (but disable this feature on localhost)
     if (trackerUrl.indexOf('//') === -1 && trackerUrl.indexOf('localhost') === -1) {
       // Add wss prefix.
       trackerUrl = 'wss://' + trackerUrl
     }
-    return [trackerUrl]
-  }
-  if (dom.value.trim() === '') {
-    const announceList = createTorrent.announceList.map(function (arr) {
-      return arr[0]
-    }).concat(createTorrent.announceList).filter(function (url) {
-      return url.indexOf('wss://') === 0 || url.indexOf('ws://') === 0
+    // if trackerURL ends with /, remove it
+    if (trackerUrl.endsWith('/')) {
+      trackerUrl = trackerUrl.slice(0, -1)
+    }
+    out = [trackerUrl]
+  } else if (dom.value.trim() === '') {
+    out = DEFAULT_TRACKERS
+  } else {
+    const trackers = dom.value.split(',')
+    trackers.forEach(tracker => {
+      tracker = tracker.trim()
+      if (tracker) {
+        out.push(tracker)
+      }
     })
-    return announceList
   }
-  const val = dom.value
-  const out = []
-  val.split(',').forEach(tracker => { if (tracker.trim()) out.push(tracker.trim()) })
+  function checkTrackerUrl (url) {
+    if (url.indexOf('//') === 0) {
+      util.error('Tracker url missing wss:// prefix: ' + url)
+      return
+    }
+    if (url.endsWith('/')) {
+      util.error('Tracker url ends with /: ' + url)
+    }
+  }
+  out.forEach(checkTrackerUrl)
   return out
 }
 
@@ -154,20 +172,20 @@ function downloadTorrent (torrentId) {
     util.log('File not found ' + torrentId)
   } else {
     util.log('Downloading torrent from ' + torrentId)
-    webtorrentClient.add(torrentId, { announce: getTrackerList() }, onTorrent)
+    webtorrentClient.add(torrentId, WEBTORRENT_OPTIONS, onTorrent)
   }
 }
 
 function downloadTorrentFile (file) {
   util.unsafeLog('Downloading torrent from <strong>' + escapeHtml(file.name) + '</strong>')
-  webtorrentClient.add(file, { announce: getTrackerList() }, onTorrent)
+  webtorrentClient.add(file, WEBTORRENT_OPTIONS, onTorrent)
 }
 
 function seed (files) {
   if (files.length === 0) return
   util.log('Seeding ' + files.length + ' files')
   // Seed from WebTorrent
-  webtorrentClient.seed(files, { announce: getTrackerList() }, onTorrent)
+  webtorrentClient.seed(files, WEBTORRENT_OPTIONS, onTorrent)
 }
 
 function onTorrent (torrent) {
