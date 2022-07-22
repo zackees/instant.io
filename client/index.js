@@ -83,9 +83,10 @@ function init () {
   if (!WebTorrent.WEBRTC_SUPPORT) {
     util.error('This browser is unsupported. Please use a browser with WebRTC support.')
   }
-
+  const dom = document.getElementById('p-nat-type')
+  let natFetched = false
   fetchNATtype(natType => {
-    const dom = document.getElementById('p-nat-type')
+    natFetched = true
     if (natType.indexOf('Symmetric') !== -1) {
       dom.innerHTML = 'You have a <b style="color: red;">' + natType + '</b> type, and this site will not work.'
     } else {
@@ -93,6 +94,8 @@ function init () {
     }
   })
 
+  const timeoutTask = () => { if (!natFetched) dom.innerHTML = '(still waiting for NAT type)' }
+  setTimeout(timeoutTask, 4000)
   // Seed via upload input element
   const upload = document.querySelector('input[name=upload]')
   if (upload) {
