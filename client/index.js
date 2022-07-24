@@ -12,10 +12,34 @@ const util = require('./util')
 const fetchNATtype = require('./NATtype').fetchNATtype
 const rtcConfig = require('../secret/index').rtcConfig
 
+const DEFAULT_TRACKERS = ['wss://webtorrent-tracker.onrender.com']
+
+function getDefaultTracker () {
+  let trackerUrl = new URLSearchParams(window.location.search).get('tracker')
+  if (trackerUrl) {
+    // Auto-add the protocol if it's missing (but disable this feature on localhost)
+    if (trackerUrl.indexOf('//') === -1 && trackerUrl.indexOf('localhost') === -1) {
+      // Add wss prefix.
+      trackerUrl = 'wss://' + trackerUrl
+    }
+    // if trackerURL ends with /, remove it
+    if (trackerUrl.endsWith('/')) {
+      trackerUrl = trackerUrl.slice(0, -1)
+    }
+    return [trackerUrl]
+  } else {
+    return DEFAULT_TRACKERS
+  }
+}
+
 // Previously this was:
 // ["wss://tracker.btorrent.xyz", "wss://tracker.openwebtorrent.com"]
-const DEFAULT_TRACKERS = ['wss://webtorrent-tracker.onrender.com']
-const WEBTORRENT_OPTIONS = { announce: getTrackerList() }
+const domTracker = document.getElementById('trackers')
+domTracker.value = getDefaultTracker().join(',')
+
+function getWebtorrentOptions () {
+  return { announce: getTrackerList() }
+}
 
 const WEBTORRENT_CONFIG = {
   tracker: {
@@ -27,32 +51,14 @@ const WEBTORRENT_CONFIG = {
 // const DEFAULT_TRACKERS = ['ws://localhost:8000/']
 // Overrides if url search params has tracker=<url>
 function getTrackerList () {
-  // Get the url params as a map
-  const dom = document.getElementById('trackers')
-  let trackerUrl = new URLSearchParams(window.location.search).get('tracker')
-  let out = []
-  if (trackerUrl) {
-    // Auto-add the protocol if it's missing (but disable this feature on localhost)
-    if (trackerUrl.indexOf('//') === -1 && trackerUrl.indexOf('localhost') === -1) {
-      // Add wss prefix.
-      trackerUrl = 'wss://' + trackerUrl
+  const trackers = []
+  domTracker.value.split(',').forEach(tracker => {
+    tracker = tracker.trim()
+    if (tracker) {
+      trackers.push(tracker)
     }
-    // if trackerURL ends with /, remove it
-    if (trackerUrl.endsWith('/')) {
-      trackerUrl = trackerUrl.slice(0, -1)
-    }
-    out = [trackerUrl]
-  } else if (dom.value.trim() === '') {
-    out = DEFAULT_TRACKERS
-  } else {
-    const trackers = dom.value.split(',')
-    trackers.forEach(tracker => {
-      tracker = tracker.trim()
-      if (tracker) {
-        out.push(tracker)
-      }
-    })
-  }
+  })
+
   function checkTrackerUrl (url) {
     if (url.indexOf('//') === 0) {
       util.error('Tracker url missing wss:// prefix: ' + url)
@@ -62,12 +68,9 @@ function getTrackerList () {
       util.error('Tracker url ends with /: ' + url)
     }
   }
-  out.forEach(checkTrackerUrl)
-  return out
+  trackers.forEach(checkTrackerUrl)
+  return trackers
 }
-
-// Dom element will be the source of truth.
-document.getElementById('trackers').value = getTrackerList().join(',')
 
 function newWebtorrentClient () {
   // console.log('getClient options:', options)
@@ -161,19 +164,19 @@ function isNotTorrentFile (file) {
 
 function downloadTorrent (torrentId) {
   util.log('Downloading torrent from ' + torrentId)
-  webtorrentClient.add(torrentId, WEBTORRENT_OPTIONS, onTorrent)
+  webtorrentClient.add(torrentId, getWebtorrentOptions(), onTorrent)
 }
 
 function downloadTorrentFile (file) {
   util.unsafeLog('Downloading torrent from <strong>' + escapeHtml(file.name) + '</strong>')
-  webtorrentClient.add(file, WEBTORRENT_OPTIONS, onTorrent)
+  webtorrentClient.add(file, getWebtorrentOptions(), onTorrent)
 }
 
 function seed (files) {
   if (files.length === 0) return
   util.log('Seeding ' + files.length + ' files')
   // Seed from WebTorrent
-  webtorrentClient.seed(files, WEBTORRENT_OPTIONS, onTorrent)
+  webtorrentClient.seed(files, getWebtorrentOptions(), onTorrent)
 }
 
 function onTorrent (torrent) {
@@ -289,3 +292,10 @@ function onTorrent (torrent) {
 }
 
 init()
+
+// if there is a url in the search params then use that to...
+const magnetUrl = new URLSearchParams(window.location.search).get('magnet')
+if (magnetUrl) {
+  document.getElementById('input-torrent-id').value = magnetUrl
+  document.getElementById('btn-submit').click()
+}

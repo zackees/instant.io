@@ -84,7 +84,7 @@ app.use(express.static(path.join(__dirname, '../static')))
 
 app.get('/', function (req, res) {
   res.render('index', {
-    title: 'Instant.io - Streaming file transfer over WebTorrent'
+    title: 'Webtorrentseeder - Utility for seeding torrents'
   })
 })
 
@@ -93,9 +93,8 @@ app.get('/config', cors({
     cb(null, true)
   }
 }), function (req, res) {
-  // console.log('referer:', req.headers.referer, 'user-agent:', req.headers['user-agent'])
+  console.log('/config request', req.query)
   const rtcConfig = secret.rtcConfig
-
   if (!rtcConfig) return res.status(404).send({ rtcConfig: {} })
   res.send({
     rtcConfig
@@ -108,7 +107,7 @@ app.get('/config', cors({
 
 app.get('*', function (req, res) {
   res.status(404).render('error', {
-    title: '404 Page Not Found - Instant.io',
+    title: '404 Page Not Found - Webtorrentseeder.com',
     message: '404 Not Found'
   })
 })
