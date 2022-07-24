@@ -14,7 +14,7 @@ const rtcConfig = require('../secret/index').rtcConfig
 
 // Previously this was:
 // ["wss://tracker.btorrent.xyz", "wss://tracker.openwebtorrent.com"]
-const DEFAULT_TRACKERS = ['wss://webtorrent-tracker.onrender.com:8000']
+const DEFAULT_TRACKERS = ['wss://webtorrent-tracker.onrender.com']
 const WEBTORRENT_OPTIONS = { announce: getTrackerList() }
 
 const WEBTORRENT_CONFIG = {
