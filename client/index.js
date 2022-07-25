@@ -117,7 +117,7 @@ function init () {
   if (form) {
     form.addEventListener('submit', function (e) {
       e.preventDefault()
-      downloadTorrent(document.querySelector('form input[name=torrentId]').value.trim())
+      downloadTorrent(document.querySelector('form textarea[name=torrentId]').value.trim())
     })
   }
 

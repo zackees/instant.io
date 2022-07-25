@@ -15,23 +15,25 @@ block body
       h1 Start sharing
       p(id='p-nat-type')
         | You have a...
-      p See <a href="/config">STUN/TURN configuration.</a>
-      p
-        | Torrent Trackers:
-        | #{ ' ' }
-        input(type='text', id='trackers' style='width: 100%;')
+      p See STUN/TURN<a href="/config">configuration.</a>
       p
         | Drag-and-drop files to begin seeding. Or choose a file:
         | #{ ' ' }
         input(type='file', name='upload', multiple)
+      p
+        | Current Webtorrent Trackers:
+        | #{ ' ' }
+        input(type='text', id='trackers' style='width: 100%;')
 
     hr
 
     section
       h1 Or download using a magnet link
       form
-        label(for='torrentId') Download from a magnet link or info hash
-        input(name='torrentId', id="input-torrent-id" placeholder='magnet:', required)
+        label(for='torrentId') Download using magnet link
+        br
+        textarea(name='torrentId', id="input-torrent-id" placeholder='magnet:?xt=urn:btih:4053f84988c249c7efa6643...', rows="3", style="width: 100%;", required)
+        br
         button(type='submit' id="btn-submit") Download
 
     hr
