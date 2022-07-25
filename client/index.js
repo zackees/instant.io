@@ -146,6 +146,14 @@ function onFiles (files) {
     debug(' - %s (%s bytes)', file.name, file.size)
   })
 
+  // get the tracking servers
+  getTrackerList().forEach(tracker => {
+    const correctSchema = tracker.startsWith('wss://') || tracker.startsWith('ws://')
+    if (!correctSchema) {
+      window.alert(`WARNING! Tracker "${tracker}" is invalid!\nTracker url must start with wss:// or ws://`)
+    }
+  })
+
   // .torrent file = start downloading the torrent
   files.filter(isTorrentFile).forEach(downloadTorrentFile)
 
