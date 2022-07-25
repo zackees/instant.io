@@ -163,12 +163,12 @@ function isNotTorrentFile (file) {
 }
 
 function downloadTorrent (torrentId) {
-  util.log('Downloading torrent from ' + torrentId)
+  util.unsafeLog('Downloading torrent:<br><br><strong>' + escapeHtml(torrentId) + '</strong>')
   webtorrentClient.add(torrentId, getWebtorrentOptions(), onTorrent)
 }
 
 function downloadTorrentFile (file) {
-  util.unsafeLog('Downloading torrent from <strong>' + escapeHtml(file.name) + '</strong>')
+  util.unsafeLog('Downloading torrent:<br><br><strong>' + escapeHtml(file.name) + '</strong>')
   webtorrentClient.add(file, getWebtorrentOptions(), onTorrent)
 }
 
