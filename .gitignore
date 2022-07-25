@@ -3,3 +3,4 @@ node_modules
 static/main.css
 static/bundle.js
 package-lock.json
+*Thumbs.db*
