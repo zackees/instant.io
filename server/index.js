@@ -19,6 +19,9 @@ try {
 const app = express()
 const server = http.createServer(app)
 
+// Todo, periodically update stunServers so that we have more redundancy.
+const stunServers = secret.stunServers
+
 // Trust "X-Forwarded-For" and "X-Forwarded-Proto" nginx headers
 app.enable('trust proxy')
 
@@ -76,17 +79,29 @@ app.get('/', function (req, res) {
   })
 })
 
+function makeRtcConfig () {
+  const rtcConfig = {
+    iceServers: [
+      {
+        urls: stunServers
+      }
+    ],
+    // Turn servers would normally go here but we don't want to support that code path.
+    sdpSemantics: 'unified-plan',
+    bundlePolicy: 'max-bundle',
+    iceCandidatePoolsize: 1
+  }
+  return rtcConfig
+}
+
 app.get('/config', cors({
   origin: function (origin, cb) {
     cb(null, true)
   }
 }), function (req, res) {
   console.log('/config request', req.query)
-  const rtcConfig = secret.rtcConfig
-  if (!rtcConfig) return res.status(404).send({ rtcConfig: {} })
-  res.send({
-    rtcConfig
-  })
+  const rtcConfig = makeRtcConfig()
+  res.send({ rtcConfig })
 })
 
 // app.get('/500', (req, res, next) => {
