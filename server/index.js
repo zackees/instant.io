@@ -47,15 +47,6 @@ app.use(function (req, res, next) {
     return res.redirect('https://' + req.hostname.slice(4) + req.url)
   }
 
-  // Use HTTP Strict Transport Security
-  // Lasts 1 year, incl. subdomains, allow browser preload list
-  if (config.isProd) {
-    res.header(
-      'Strict-Transport-Security',
-      'max-age=31536000; includeSubDomains; preload'
-    )
-  }
-
   // Add cross-domain header for fonts, required by spec, Firefox, and IE.
   const extname = path.extname(req.url)
   if (['.eot', '.ttf', '.otf', '.woff', '.woff2'].indexOf(extname) >= 0) {
@@ -65,9 +56,6 @@ app.use(function (req, res, next) {
   // Prevents IE and Chrome from MIME-sniffing a response. Reduces exposure to
   // drive-by download attacks on sites serving user uploaded content.
   res.header('X-Content-Type-Options', 'nosniff')
-
-  // Prevent rendering of site within a frame.
-  res.header('X-Frame-Options', 'DENY')
 
   // Enable the XSS filter built into most recent web browsers. It's usually
   // enabled by default anyway, so role of this headers is to re-enable for this

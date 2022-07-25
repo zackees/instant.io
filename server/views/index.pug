@@ -12,10 +12,13 @@ block body
     .log
 
     section
-      h1 Start sharing
+      h1 Check your connection 
       p(id='p-nat-type')
         | You have a...
-      p See STUN/TURN<a href="/config">configuration.</a>
+      p NAT Detection: <a href="/config">configuration.</a>
+
+    section
+      h1 Add File to start swarm
       p
         | Drag-and-drop files to begin seeding. Or choose a file:
         | #{ ' ' }
@@ -23,7 +26,8 @@ block body
       p
         | Current Webtorrent Trackers:
         | #{ ' ' }
-        input(type='text', id='trackers' style='width: 100%;')
+        input(type='text', id='trackers' style='width: 100%; font-family: monospace;')
+      
 
     hr
 
