@@ -7,7 +7,8 @@ const DEFAULT_ICE_SERVERS = [
   { urls: 'stun:stun1.l.google.com:19302' },
   { urls: 'stun:stun2.l.google.com:19302' },
   */
-  { urls: 'stun:global.stun.twilio.com:3478' }
+  { urls: 'stun:relay.socket.dev:443' }
+  /* { urls: 'stun:global.stun.twilio.com:3478' } */
 ]
 
 function parseCandidate (line) {

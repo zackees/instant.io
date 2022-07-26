@@ -3,7 +3,7 @@ exports.rollbar = {
 }
 
 exports.stunServers = [
-  'stun:global.stun.twilio.com:3478'
+  'stun:relay.socket.dev:443'
 ]
 
 exports.rtcConfig = {
