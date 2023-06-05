@@ -12,7 +12,8 @@ const util = require('./util')
 const fetchNATtype = require('./NATtype').fetchNATtype
 const rtcConfig = require('../secret/index').rtcConfig
 
-const DEFAULT_TRACKERS = ['wss://webtorrent-tracker.onrender.com']
+//const DEFAULT_TRACKERS = ['wss://webtorrent-tracker.onrender.com']
+const DEFAULT_TRACKERS = ['wss://tracker.openwebtorrent.com', "wss://tracker.btorrent.xyz", ]
 
 function getDefaultTracker () {
   let trackerUrl = new URLSearchParams(window.location.search).get('tracker')
@@ -32,8 +33,6 @@ function getDefaultTracker () {
   }
 }
 
-// Previously this was:
-// ["wss://tracker.btorrent.xyz", "wss://tracker.openwebtorrent.com"]
 const domTracker = document.getElementById('trackers')
 domTracker.value = getDefaultTracker().join(',')
 

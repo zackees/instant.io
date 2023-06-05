@@ -19,6 +19,11 @@ browser without plugins. WebTorrent is powered by JavaScript and WebRTC. Support
 Firefox, Opera (desktop and Android). Run <code>localStorage.debug = '*'</code> in the
 console and refresh to get detailed log output.
 
+## Changes in this fork:
+
+  * `?magnet=...` is now a url param so that this service can be used to direct a user to a specific torrent.
+  * `?tracker=...` is now a url param so that this service can be used to use a specific tracker after the torrent has been generated.
+
 ## Install
 
 If you just want to do file transfer on your site, or fetch/seed files over WebTorrent, then there's no need to run a copy of instant.io on your own server. Just use the WebTorrent script directly. You can learn more at https://webtorrent.io.
